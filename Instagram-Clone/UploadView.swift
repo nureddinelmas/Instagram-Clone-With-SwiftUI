@@ -1,126 +1,17 @@
 //
-//  ContentView.swift
+//  UploadView.swift
 //  Instagram-Clone
 //
-//  Created by Nureddin Elmas on 2021-12-21.
+//  Created by Nureddin Elmas on 2021-12-23.
 //
 
 import SwiftUI
-import CoreMedia
-import Firebase
 import FirebaseStorage
-import SwURL
-import SDWebImage
-import SDWebImageSwiftUI
+import Firebase
+import FirebaseAuth
+import FirebaseFirestoreSwift
 
-var db = Firestore.firestore()
-var storage = Storage.storage()
-
-
-struct ContentView: View {
-    var body: some View {
-        TabView{
-           
-            MySida().tabItem {
-                    Image(systemName: "book.closed")
-                    Text("My Sida")
-                }
-            
-            Upload().tabItem {
-                        Image(systemName: "square.and.arrow.up.on.square")
-                        Text("Upload")
-                    }
-        
-        Text("Settings")
-            .tabItem {
-                Image(systemName: "circle.grid.cross")
-                Text("Settings")
-            }
-        }
-        .navigationBarBackButtonHidden(true)
-        .navigationBarItems(trailing: NavigationLink(destination: UploadView()){
-            Image(systemName: "plus.circle")
-        })
-}
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
-
-struct MySida: View{
-    @State var items = [Items]()
-    
-    @State var image:UIImage = UIImage()
-    
-    init(){
-        listenToFirebase()
-        
-    }
-    var body: some View{
-        NavigationView{
-            
-      
-            List{
-                ForEach(items){item in
-                    VStack(alignment: .leading ){
-                        HStack{
-                            ZStack{
-                                
-                                Circle().fill(Color.red).frame(width: 30, height: 30, alignment: .center)
-                                Image(systemName: "person")
-                            }
-                           
-                            Text(item.userName)
-                                .background(Color.red)
-                        }
-                 
-                        WebImage(url: URL(string: item.imageUrl))
-                        .resizable()
-                        .scaledToFit()
-//                        .clipShape(Circle())
-//                        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height * 0.3, alignment: .center)
-                        Text(item.comment)
-                    }
-                }
-            }
-           
-            .onAppear {
-                listenToFirebase()
-            }
-            .navigationTitle("Instagram").font(.callout)
-        }
-    }
-    
-    func listenToFirebase(){
-        db.collection("Posts").addSnapshotListener { snapshot, error in
-            guard let snapshot = snapshot else {return}
-            if error == nil{
-                for document in snapshot.documents{
-                    let result = Result {
-                        try document.data(as: Items.self)
-                    }
-                
-                    switch result {
-                    case .success(let item):
-                        if let item = item {
-                            items.append(item)
-                        } else {
-                            print("document doesnt exist")
-                        }
-                    case.failure(let failure):
-                        print("Error \(failure)")
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-struct Upload: View {
+struct UploadView: View {
     var imageRef = storage.reference().child("images")
     
     @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
@@ -237,3 +128,8 @@ struct Upload: View {
     }
 }
 
+struct UploadView_Previews: PreviewProvider {
+    static var previews: some View {
+        UploadView()
+    }
+}
